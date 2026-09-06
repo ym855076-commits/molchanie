@@ -157,6 +157,38 @@
   footer{
     text-align:center; padding:36px 24px 24px; color:var(--muted); font-size:12px;
   }
+
+  /* MONITOR */
+  .mon-note{font-size:13px; color:var(--muted); margin:0 0 22px; line-height:1.6;}
+  .mon-wrap{text-align:center;}
+  .mon-face{
+    width:180px;height:180px;margin:0 auto 20px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    position:relative; transition:border-color .3s;
+  }
+  .mon-face.active{border-color:var(--gold-soft);}
+  .mon-face.talking{border-color:var(--gold);}
+  .mon-time{font-family:var(--serif); font-size:30px; color:var(--paper);}
+  .mon-status{font-size:12px; color:var(--muted); margin-top:6px;}
+  .mon-limits{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:18px;}
+  .mon-limit{
+    background:none; border:1px solid var(--line); color:var(--muted);
+    font-family:var(--sans); font-size:13px; padding:8px 14px;
+    cursor:pointer; border-radius:2px;
+  }
+  .mon-limit.selected{border-color:var(--gold-soft); color:var(--gold-soft);}
+  .mon-toggle{margin-top:4px;}
+  .mon-overlay{
+    position:fixed; inset:0; background:rgba(21,23,27,0.97);
+    display:none; align-items:center; justify-content:center;
+    z-index:999; text-align:center; padding:24px;
+  }
+  .mon-overlay.show{display:flex;}
+  .mon-overlay p{
+    font-family:var(--serif); font-size:28px; color:var(--gold-soft);
+  }
 </style>
 </head>
 <body>
@@ -229,6 +261,28 @@
       </div>
     </div>
   </section>
+
+  <section>
+    <p class="eyebrow">Инструмент</p>
+    <h2>Монитор голоса</h2>
+    <p class="mon-note">Слушает через микрофон, пока страница открыта на экране. Звук нигде не сохраняется и не отправляется — только замеряется громкость на месте. Работает только на переднем плане: выключишь экран или свернёшь браузер — микрофон отключится.</p>
+    <div class="mon-wrap">
+      <div class="mon-face" id="monFace">
+        <span class="mon-time" id="monTime">0:00</span>
+        <span class="mon-status" id="monStatus">выключено</span>
+      </div>
+      <div class="mon-limits" id="monLimits">
+        <button class="mon-limit selected" onclick="setMonLimit(30,this)">30 сек</button>
+        <button class="mon-limit" onclick="setMonLimit(60,this)">1 мин</button>
+        <button class="mon-limit" onclick="setMonLimit(120,this)">2 мин</button>
+      </div>
+      <button class="btn mon-toggle" id="monToggleBtn" onclick="toggleMonitor()">Включить микрофон</button>
+    </div>
+  </section>
+
+  <div class="mon-overlay" id="monOverlay">
+    <p>Помолчи.</p>
+  </div>
 
   <section>
     <p class="eyebrow">Личное</p>
@@ -311,6 +365,112 @@ function startTimer(seconds){
       num.textContent = remaining;
     }
   }, 1000);
+}
+
+/* ---- voice monitor ---- */
+let monLimit = 30;         // seconds of continuous talking before reminder
+const SILENCE_RESET = 4;   // seconds of quiet that count as "stopped talking"
+const THRESHOLD = 0.018;   // rms volume threshold for "talking"
+let monActive = false;
+let audioCtx, analyser, micStream, monRAF;
+let speakStart = null;
+let lastLoud = null;
+let monTickInterval = null;
+
+function setMonLimit(sec, btn){
+  monLimit = sec;
+  document.querySelectorAll('.mon-limit').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+async function toggleMonitor(){
+  if(monActive){
+    stopMonitor();
+  } else {
+    try{
+      micStream = await navigator.mediaDevices.getUserMedia({audio:true});
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(micStream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 1024;
+      source.connect(analyser);
+      monActive = true;
+      speakStart = null;
+      lastLoud = null;
+      document.getElementById('monFace').classList.add('active');
+      document.getElementById('monToggleBtn').textContent = 'Выключить микрофон';
+      document.getElementById('monStatus').textContent = 'слушаю...';
+      monRAF = requestAnimationFrame(monitorLoop);
+      monTickInterval = setInterval(updateMonDisplay, 250);
+    } catch(e){
+      document.getElementById('monStatus').textContent = 'нет доступа к микрофону';
+    }
+  }
+}
+
+function stopMonitor(){
+  monActive = false;
+  if(micStream) micStream.getTracks().forEach(t=>t.stop());
+  if(audioCtx) audioCtx.close();
+  cancelAnimationFrame(monRAF);
+  clearInterval(monTickInterval);
+  document.getElementById('monFace').classList.remove('active','talking');
+  document.getElementById('monToggleBtn').textContent = 'Включить микрофон';
+  document.getElementById('monStatus').textContent = 'выключено';
+  document.getElementById('monTime').textContent = '0:00';
+  speakStart = null; lastLoud = null;
+}
+
+function monitorLoop(){
+  if(!monActive) return;
+  const data = new Uint8Array(analyser.fftSize);
+  analyser.getByteTimeDomainData(data);
+  let sum = 0;
+  for(let i=0;i<data.length;i++){
+    const v = (data[i]-128)/128;
+    sum += v*v;
+  }
+  const rms = Math.sqrt(sum/data.length);
+  const now = Date.now()/1000;
+
+  if(rms > THRESHOLD){
+    lastLoud = now;
+    if(speakStart === null) speakStart = now;
+  } else if(speakStart !== null && lastLoud !== null && (now - lastLoud) > SILENCE_RESET){
+    speakStart = null;
+  }
+  monRAF = requestAnimationFrame(monitorLoop);
+}
+
+function updateMonDisplay(){
+  if(!monActive) return;
+  const face = document.getElementById('monFace');
+  const status = document.getElementById('monStatus');
+  const timeEl = document.getElementById('monTime');
+  if(speakStart === null){
+    face.classList.remove('talking');
+    status.textContent = 'слушаю...';
+    timeEl.textContent = '0:00';
+    return;
+  }
+  const elapsed = Date.now()/1000 - speakStart;
+  face.classList.add('talking');
+  status.textContent = 'говоришь без пауз';
+  const m = Math.floor(elapsed/60);
+  const s = Math.floor(elapsed%60);
+  timeEl.textContent = m + ':' + String(s).padStart(2,'0');
+
+  if(elapsed >= monLimit){
+    triggerReminder();
+    speakStart = Date.now()/1000;
+  }
+}
+
+function triggerReminder(){
+  if(navigator.vibrate) navigator.vibrate([200,100,200,100,400]);
+  const overlay = document.getElementById('monOverlay');
+  overlay.classList.add('show');
+  setTimeout(()=>overlay.classList.remove('show'), 2200);
 }
 
 /* ---- journal (localStorage) ---- */
