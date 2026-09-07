@@ -187,16 +187,12 @@
         <div id="entries-list" style="margin-top: 10px; font-size: 12px;"></div>
     </div>
 
-    <!-- МАТЕРИАЛЫ И ЗАГРУЗКА -->
+    <!-- МАТЕРИАЛЫ -->
     <div class="card">
         <div class="section-label">Ресурсы</div>
         <h2>Материалы</h2>
         <a class="btn btn-sub" href="https://www.youtube.com/watch?v=5qap5aO4i9A" target="_blank">Открыть ролик на YouTube ↗</a>
-        <button class="btn btn-sub" onclick="copyVideoLink()">📋 Скопировать ссылку на видео</button>
-        <div style="display: flex; gap: 8px; margin-top: 8px;">
-            <a class="btn btn-sub" href="https://github.com/TeamNewPipe/NewPipe/releases/download/v0.29.1/NewPipe_v0.29.1.apk" target="_blank">NewPipe (.apk)</a>
-            <a class="btn btn-sub" href="https://github.com/deniscerri/ytdl-nis/releases" target="_blank">Загрузчик YTDL</a>
-        </div>
+        <button class="btn btn-sub" style="margin-top: 8px;" onclick="copyVideoLink()">📋 Скопировать ссылку на видео</button>
     </div>
 
     <script>
@@ -210,7 +206,7 @@
             navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
         }
 
-        // ЛАЙФХАКИИ И ТРЕКЕР СЕРИИ
+        // ЛАЙФХАКИ И ТРЕКЕР СЕРИИ
         const challenges = [
             "Лайфхак: Сделай паузу в 3 секунды перед тем, как ответить на любой вопрос.",
             "Лайфхак: Сегодня не доказывай никому свою правоту в социальных сетях и чатах.",
@@ -303,7 +299,7 @@
         // КОПИРОВАНИЕ ССЫЛКИ
         function copyVideoLink() {
             navigator.clipboard.writeText("https://www.youtube.com/watch?v=5qap5aO4i9A").then(() => {
-                alert("Ссылка скопирована! Вставьте её в NewPipe или YTDL.");
+                alert("Ссылка скопирована!");
             });
         }
 
@@ -357,7 +353,7 @@
                 alert('Дневник пока пуст.');
                 return;
             }
-            let content = "ДНЕВНИК ВЫДЕРЖКИИ И МОЛЧАНИЯ\n\n";
+            let content = "ДНЕВНИК ВЫДЕРЖКИ И МОЛЧАНИЯ\n\n";
             entries.forEach((e, i) => {
                 content += `${i + 1}. [${e.date}] ${e.text}\n`;
             });
