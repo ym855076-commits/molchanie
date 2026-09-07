@@ -1,0 +1,17 @@
+{
+  "name": "Молчание",
+  "short_name": "Молчание",
+  "description": "Практика сдержанности: паузы, дневник выдержки, монитор голоса",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#15171b",
+  "theme_color": "#15171b",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
