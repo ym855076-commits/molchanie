@@ -89,9 +89,8 @@
 
         .btn-sub { border-color: var(--border-color); color: var(--paper-dim); }
 
-        textarea {
+        textarea, input[type="number"] {
             width: 100%;
-            height: 70px;
             background: rgba(0,0,0,0.2);
             border: 1px solid var(--border-color);
             border-radius: 4px;
@@ -99,8 +98,9 @@
             color: var(--text-color);
             font-size: 13px;
             margin: 8px 0;
-            resize: none;
         }
+
+        textarea { height: 70px; resize: none; }
 
         .checkbox-group { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
         .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
@@ -123,7 +123,7 @@
         <button class="top-btn" onclick="toggleTheme()">Тема</button>
     </header>
 
-    <!-- МЕДИТАТИВНЫЙ ЗВУК -->
+    <!-- АТМОСФЕРА -->
     <div class="card">
         <div class="section-label">Атмосфера</div>
         <h2>Фоновый покой</h2>
@@ -131,6 +131,17 @@
             <span style="font-size: 13px; color: var(--paper-dim);">Расслабляющий гул</span>
             <button class="top-btn" id="audio-btn" onclick="toggleAudio()">▶ Включить</button>
         </div>
+    </div>
+
+    <!-- ТАЙМЕР / БУДИЛЬНИК МОЛЧАНИЯ -->
+    <div class="card">
+        <div class="section-label">Практика</div>
+        <h2>Будильник молчания</h2>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="number" id="alarm-min" placeholder="Минуты (напр. 15)" min="1" max="180">
+            <button class="btn" style="margin-top:0; width: auto; whitespace: nowrap;" onclick="setAlarm()">Старт</button>
+        </div>
+        <div id="alarm-status" style="font-size: 12px; color: var(--gold-soft); margin-top: 5px;"></div>
     </div>
 
     <!-- МУДРОСТЬ -->
@@ -175,19 +186,20 @@
         <div id="entries-list" style="margin-top: 10px; font-size: 12px;"></div>
     </div>
 
-    <!-- ССЫЛКИ И ВЕДИО -->
+    <!-- МАТЕРИАЛЫ И ЗАГРУЗКА -->
     <div class="card">
         <div class="section-label">Ресурсы</div>
         <h2>Материалы</h2>
         <a class="btn btn-sub" href="https://youtu.be/5qap5aO4i9A" target="_blank">Открыть ролик на YouTube ↗</a>
+        <button class="btn btn-sub" onclick="copyVideoLink()">📋 Скопировать ссылку на видео</button>
         <div style="display: flex; gap: 8px; margin-top: 8px;">
-            <a class="btn btn-sub" href="https://www.vidmateapp.com" target="_blank">Скачать через VidMate</a>
-            <a class="btn btn-sub" href="https://newpipe.net" target="_blank">Открыть в NewPipe</a>
+            <a class="btn btn-sub" href="https://github.com/TeamNewPipe/NewPipe/releases/download/v0.29.1/NewPipe_v0.29.1.apk" target="_blank">NewPipe (.apk)</a>
+            <a class="btn btn-sub" href="https://github.com/JunkFood4602/Seal/releases/latest" target="_blank">Seal (Загрузчик)</a>
         </div>
     </div>
 
     <script>
-        // ОФФЛАЙН РЕЖИМ (SERVICE WORKER)
+        // ОФФЛАЙН РЕЖИМ
         if ('serviceWorker' in navigator) {
             const swCode = `
                 self.addEventListener('install', e => e.waitUntil(caches.open('pwa').then(c => c.addAll(['./']))));
@@ -197,7 +209,7 @@
             navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
         }
 
-        // АУДИО (Генератор тона без внешних файлов - работает оффлайн)
+        // АУДИО
         let audioCtx, osc, gainNode, isPlaying = false;
         function toggleAudio() {
             if(!isPlaying) {
@@ -205,7 +217,7 @@
                 osc = audioCtx.createOscillator();
                 gainNode = audioCtx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(108, audioCtx.currentTime); // Частота 108 Гц (Ом)
+                osc.frequency.setValueAtTime(108, audioCtx.currentTime);
                 gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
                 osc.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
@@ -217,6 +229,47 @@
                 document.getElementById('audio-btn').innerText = '▶ Включить';
                 isPlaying = false;
             }
+        }
+
+        // БУДИЛЬНИК / ТАЙМЕР
+        let alarmTimer = null;
+        function setAlarm() {
+            const minInput = document.getElementById('alarm-min').value;
+            const status = document.getElementById('alarm-status');
+            if (!minInput || minInput <= 0) {
+                status.innerText = "Укажите количество минут.";
+                return;
+            }
+            if (alarmTimer) clearTimeout(alarmTimer);
+            
+            const ms = minInput * 60 * 1000;
+            status.innerText = `Будильник установлен на ${minInput} мин.`;
+            
+            alarmTimer = setTimeout(() => {
+                playAlarmSound();
+                alert(`Время практики (${minInput} мин.) завершено!`);
+                status.innerText = "";
+            }, ms);
+        }
+
+        function playAlarmSound() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(440, ctx.currentTime);
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 1.5);
+        }
+
+        // КОПИРОВАНИЕ ССЫЛКИ (ЛАЙФХАК)
+        function copyVideoLink() {
+            navigator.clipboard.writeText("https://youtu.be/5qap5aO4i9A").then(() => {
+                alert("Ссылка скопирована! Вставьте её в VidMate, NewPipe или Seal.");
+            });
         }
 
         // ЦИТАТЫ
