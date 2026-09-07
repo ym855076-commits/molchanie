@@ -6,32 +6,34 @@
     <title>Молчание — Искусство выдержки</title>
     <style>
         :root {
-            --bg-color: #121417;
-            --card-bg: #1a1d24;
-            --text-color: #e0e0e0;
-            --accent-color: #d4af37;
-            --border-color: #262a33;
-            --subtext-color: #9aa0a6;
+            --ink: #15171b;
+            --ink-soft: #1d2025;
+            --paper: #ece7df;
+            --paper-dim: #b9b3a6;
+            --muted: #8a8577;
+            --gold: #a9812f;
+            --gold-soft: #c0a15c;
+            --card-bg: #1d2025;
+            --text-color: #ece7df;
+            --border-color: #333842;
         }
 
         body.light-theme {
-            --bg-color: #f5f5f7;
             --card-bg: #ffffff;
-            --text-color: #1d1d1f;
-            --accent-color: #b8860b;
-            --border-color: #e5e5e7;
-            --subtext-color: #86868b;
+            --text-color: #15171b;
+            --border-color: #e0dcd3;
+            background-color: #f4f1ea;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif;
-            background-color: var(--bg-color);
+            font-family: 'Georgia', serif;
+            background-color: var(--ink);
             color: var(--text-color);
-            padding: 20px;
-            max-width: 500px;
+            padding: 20px 15px;
+            max-width: 480px;
             margin: 0 auto;
-            transition: all 0.3s ease;
+            line-height: 1.5;
         }
 
         header {
@@ -41,110 +43,120 @@
             margin-bottom: 25px;
         }
 
-        h1 { font-size: 24px; color: var(--accent-color); font-weight: normal; letter-spacing: 1px; }
+        .logo { font-size: 22px; color: var(--gold-soft); letter-spacing: 1px; }
 
-        .theme-btn {
+        .top-btn {
             background: transparent;
             border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
+            color: var(--paper-dim);
+            padding: 5px 10px;
+            border-radius: 4px;
             font-size: 12px;
+            cursor: pointer;
         }
 
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 8px;
+            padding: 18px;
             margin-bottom: 20px;
         }
 
-        .streak-count {
-            font-size: 28px;
-            color: var(--accent-color);
-            font-weight: bold;
-            display: inline-block;
-            margin-right: 6px;
+        .section-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 6px;
         }
 
-        .streak-text { color: var(--subtext-color); font-size: 14px; }
+        h2 { font-size: 18px; color: var(--gold-soft); font-weight: normal; margin-bottom: 12px; }
+
+        /* ЦИТАТА */
+        .quote-text { font-style: italic; font-size: 16px; margin-bottom: 10px; text-align: center; }
+        .quote-author { text-align: right; font-size: 12px; color: var(--gold); }
+
+        /* МОНИТОР ГОЛОСА */
+        .mic-box {
+            text-align: center;
+            padding: 15px 0;
+        }
+        .mic-timer {
+            font-size: 32px;
+            color: var(--gold-soft);
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .time-select {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .time-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--paper-dim);
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .time-btn.active { border-color: var(--gold); color: var(--gold); }
+
+        /* КНОПКИ */
+        .btn {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold-soft);
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        .btn-sub { border-color: var(--border-color); color: var(--paper-dim); }
 
         textarea {
             width: 100%;
-            height: 90px;
-            background: rgba(0,0,0,0.1);
+            height: 80px;
+            background: rgba(0,0,0,0.2);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px;
+            border-radius: 4px;
+            padding: 8px;
             color: var(--text-color);
-            font-size: 14px;
-            margin: 15px 0 10px 0;
+            font-size: 13px;
+            margin: 8px 0;
             resize: none;
         }
 
-        .btn {
-            background: transparent;
-            border: 1px solid var(--accent-color);
-            color: var(--accent-color);
-            padding: 10px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 14px;
-            transition: 0.2s;
+        /* ВИДЕО */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            margin-bottom: 10px;
+            border-radius: 4px;
         }
-
-        .btn:active { transform: scale(0.98); }
-
-        .entry-item {
-            border-bottom: 1px solid var(--border-color);
-            padding: 10px 0;
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        
+        .download-group {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
         }
-
-        .entry-date { font-size: 11px; color: var(--subtext-color); }
-
-        .checkbox-group { margin-top: 10px; }
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .checkbox-label input { margin-right: 10px; accent-color: var(--accent-color); }
-
-        .quote-box {
-            font-style: italic;
-            margin-bottom: 15px;
-            min-height: 50px;
-        }
-
-        .quote-author {
-            display: block;
-            text-align: right;
-            font-size: 12px;
-            color: var(--accent-color);
-            margin-top: 5px;
-            font-style: normal;
-        }
-
-        .video-btn {
-            display: inline-block;
-            text-decoration: none;
+        .dl-btn {
+            flex: 1;
             text-align: center;
-            background: #cc0000;
-            color: #fff;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 13px;
-            margin-top: 10px;
-            width: 100%;
+            text-decoration: none;
+            padding: 6px;
+            font-size: 11px;
+            border: 1px solid var(--border-color);
+            color: var(--paper-dim);
+            border-radius: 4px;
         }
 
         .toast {
@@ -152,149 +164,146 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--accent-color);
+            background: var(--gold);
             color: #000;
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
             display: none;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Молчание</h1>
-        <button class="theme-btn" onclick="toggleTheme()">Светлая / Тёмная</button>
+        <div class="logo">● Молчание</div>
+        <div>
+            <button class="top-btn" onclick="toggleTheme()">Светлая</button>
+        </div>
     </header>
+
+    <!-- МУДРОСТЬ -->
+    <div class="card">
+        <div class="quote-text" id="quote-text">«Тот, кто молчит первым в споре, обычно выигрывает его.»</div>
+        <div class="quote-author" id="quote-author">— Стоическая мудрость</div>
+        <div style="display: flex; gap: 8px; margin-top: 12px;">
+            <button class="btn" onclick="nextQuote()">Другая мысль →</button>
+        </div>
+    </div>
+
+    <!-- МОНИТОР ГОЛОСА (НАПОМИНАНИЕ О РЕЧИ) -->
+    <div class="card">
+        <div class="section-label">Инструмент</div>
+        <h2>Монитор речи</h2>
+        <p style="font-size: 12px; color: var(--paper-dim);">Слушает громкость. Если ты говоришь без остановки дольше указанного времени — приложение напомнит сделать паузу.</p>
+        
+        <div class="mic-box">
+            <div class="time-select">
+                <button class="time-btn active" onclick="setMicLimit(30, this)">30 сек</button>
+                <button class="time-btn" onclick="setMicLimit(60, this)">1 мин</button>
+                <button class="time-btn" onclick="setMicLimit(120, this)">2 мин</button>
+            </div>
+            <div class="mic-timer" id="mic-timer">0:00</div>
+            <button class="btn" id="mic-btn" onclick="toggleMic()">Включить монитор</button>
+        </div>
+    </div>
 
     <!-- ДНЕВНИК ВЫДЕРЖКИ -->
     <div class="card">
-        <div style="margin-bottom: 10px;">
-            <span class="streak-count" id="streak-num">0</span>
-            <span class="streak-text">дней подряд с записью</span>
-        </div>
-        <textarea id="entry-input" placeholder="Опиши момент, когда промолчал вместо того, чтобы сорваться. Что ты выиграл?"></textarea>
-        <button class="btn" onclick="saveEntry()">Сохранить запись</button>
+        <div class="section-label">Личное</div>
+        <h2>Дневник выдержки</h2>
+        <div style="font-size: 20px; color: var(--gold-soft);"><span id="streak-num">0</span> <span style="font-size: 13px; color: var(--paper-dim);">дней подряд</span></div>
         
-        <div id="entries-list" style="margin-top: 15px;"></div>
-        <button class="btn" onclick="downloadTxt()" style="margin-top: 10px; border-color: var(--border-color); color: var(--subtext-color);">Скачать записи (.txt)</button>
-    </div>
-
-    <!-- ГЕНЕРАТОР МУДРОСТИ -->
-    <div class="card">
-        <div class="quote-box">
-            <p id="quote-text">«Крепче всего звучит голос, который редко повышают.»</p>
-            <span class="quote-author" id="quote-author">— Стоическая мудрость</span>
-        </div>
-        <button class="btn" onclick="nextQuote()">Другая мысль →</button>
-    </div>
-
-    <!-- ТРИ ВОПРОСА -->
-    <div class="card">
-        <h3 style="font-size: 16px; font-weight: normal; margin-bottom: 12px; color: var(--accent-color);">Прежде чем сказать</h3>
-        <div class="checkbox-group">
-            <label class="checkbox-label"><input type="checkbox" class="check-q" onchange="checkThreeQuestions()"> Это правда?</label>
-            <label class="checkbox-label"><input type="checkbox" class="check-q" onchange="checkThreeQuestions()"> Это нужно сказать?</label>
-            <label class="checkbox-label"><input type="checkbox" class="check-q" onchange="checkThreeQuestions()"> Это можно сказать по-доброму?</label>
-        </div>
+        <textarea id="entry-input" placeholder="Опиши момент, когда промолчал..."></textarea>
+        <button class="btn" onclick="saveEntry()">Сохранить запись</button>
+        <div id="entries-list" style="margin-top: 10px;"></div>
+        <button class="btn btn-sub" onclick="downloadTxt()">Скачать записи (.txt)</button>
     </div>
 
     <!-- ВИДЕО И СКАЧИВАНИЕ -->
     <div class="card">
-        <h3 style="font-size: 16px; font-weight: normal; margin-bottom: 8px;">О молчании (Видео)</h3>
-        <p style="font-size: 12px; color: var(--subtext-color); margin-bottom: 10px;">Смотрите напрямую или скачивайте через NewPipe / VidMate</p>
-        <a class="video-btn" href="intent://www.youtube.com/watch?v=5qap5aO4i9A#Intent;package=org.schabi.newpipe;scheme=https;end">Открыть / Скачать в NewPipe ➔</a>
+        <div class="section-label">Смотреть</div>
+        <h2>О молчании</h2>
+        <div class="video-container">
+            <iframe src="https://www.youtube.com/embed/5qap5aO4i9A" allowfullscreen></iframe>
+        </div>
+        <div style="font-size: 11px; color: var(--paper-dim);">Скачать ролик в приложение:</div>
+        <div class="download-group">
+            <a class="dl-btn" href="intent://www.youtube.com/watch?v=5qap5aO4i9A#Intent;package=org.schabi.newpipe;scheme=https;end">В NewPipe</a>
+            <a class="dl-btn" href="intent://www.youtube.com/watch?v=5qap5aO4i9A#Intent;package=com.video.download.videodownloader;scheme=https;end">В VidMate</a>
+        </div>
     </div>
 
-    <div class="toast" id="toast">Запись сохранена!</div>
+    <div class="toast" id="toast"></div>
 
     <script>
         const quotes = [
-            { text: "Крепче всего звучит голос, который редко повышают.", author: "Стоическая мудрость" },
-            { text: "Лучший способ отомстить — не быть похожим на обидчика.", author: "Марк Аврелий" },
-            { text: "Природа дала нам один язык и два уха, чтобы мы больше слушали и меньше говорили.", author: "Эпиктет" },
-            { text: "Мы страдаем чаще воображением, чем реальностью.", author: "Сенека" },
-            { text: "Молчание — щит разумного.", author: "Восточная мудрость" }
+            { text: "Тот, кто молчит первым в споре, обычно выигрывает его.", author: "Стоическая мудрость" },
+            { text: "Природа дала нам один язык и два уха, чтобы мы больше слушали.", author: "Эпиктет" },
+            { text: "Молчание — щит разумного.", author: "Восточная мудрость" },
+            { text: "Мы страдаем чаще воображением, чем реальностью.", author: "Сенека" }
         ];
 
-        let entries = JSON.parse(localStorage.getItem('molchanie_entries') || '[]');
+        let micActive = false;
+        let audioContext, analyser, microphone, javascriptNode;
+        let speechSeconds = 0;
+        let speechLimit = 30;
+        let timerInterval;
 
-        function init() {
-            renderEntries();
-            updateStreak();
+        function setMicLimit(sec, btn) {
+            speechLimit = sec;
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
         }
 
-        function toggleTheme() {
-            document.body.classList.toggle('light-theme');
-        }
-
-        function showToast(text) {
-            const toast = document.getElementById('toast');
-            toast.innerText = text;
-            toast.style.display = 'block';
-            setTimeout(() => toast.style.display = 'none', 2000);
-        }
-
-        function saveEntry() {
-            const input = document.getElementById('entry-input');
-            const text = input.value.trim();
-            if(!text) return;
-
-            const newEntry = {
-                id: Date.now(),
-                date: new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }),
-                timestamp: Date.now(),
-                text: text
-            };
-
-            entries.unshift(newEntry);
-            localStorage.setItem('molchanie_entries', JSON.stringify(entries));
-            input.value = '';
-            renderEntries();
-            updateStreak();
-            showToast('Запись сохранена!');
-        }
-
-        function renderEntries() {
-            const list = document.getElementById('entries-list');
-            list.innerHTML = entries.map(e => `
-                <div class="entry-item">
-                    <div>
-                        <div style="font-size: 14px;">${e.text}</div>
-                        <div class="entry-date">${e.date}</div>
-                    </div>
-                    <span style="cursor:pointer; color:#888;" onclick="deleteEntry(${e.id})">✕</span>
-                </div>
-            `).join('');
-        }
-
-        function deleteEntry(id) {
-            entries = entries.filter(e => e.id !== id);
-            localStorage.setItem('molchanie_entries', JSON.stringify(entries));
-            renderEntries();
-            updateStreak();
-        }
-
-        function updateStreak() {
-            if(entries.length === 0) {
-                document.getElementById('streak-num').innerText = '0';
-                return;
+        function toggleMic() {
+            if(micActive) {
+                stopMic();
+            } else {
+                startMic();
             }
-            // Простой расчёт уникальных дней
-            const uniqueDays = new Set(entries.map(e => e.date));
-            document.getElementById('streak-num').innerText = uniqueDays.size;
         }
 
-        function downloadTxt() {
-            if(entries.length === 0) return alert('Нет записей для скачивания');
-            const txt = entries.map(e => `=== ${e.date} ===\n${e.text}\n`).join('\n----------------------------------------\n\n');
-            const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'dnevnik-vyderzhki.txt';
-            a.click();
+        function startMic() {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                micActive = true;
+                document.getElementById('mic-btn').innerText = 'Остановить';
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+                analyser.smoothingTimeConstant = 0.8;
+                analyser.fftSize = 1024;
+
+                microphone.connect(analyser);
+                analyser.connect(javascriptNode);
+                javascriptNode.connect(audioContext.destination);
+
+                timerInterval = setInterval(() => {
+                    speechSeconds++;
+                    let m = Math.floor(speechSeconds / 60);
+                    let s = speechSeconds % 60;
+                    document.getElementById('mic-timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+
+                    if(speechSeconds >= speechLimit) {
+                        alert('Внимание: Ты говоришь слишком долго! Сделай паузу и послушай собеседника.');
+                        stopMic();
+                    }
+                }, 1000);
+
+            }).catch(err => alert('Нет доступа к микрофону'));
+        }
+
+        function stopMic() {
+            micActive = false;
+            document.getElementById('mic-btn').innerText = 'Включить монитор';
+            clearInterval(timerInterval);
+            speechSeconds = 0;
+            document.getElementById('mic-timer').innerText = '0:00';
+            if(audioContext) audioContext.close();
         }
 
         function nextQuote() {
@@ -303,16 +312,32 @@
             document.getElementById('quote-author').innerText = `— ${q.author}`;
         }
 
-        function checkThreeQuestions() {
-            const checkboxes = document.querySelectorAll('.check-q');
-            const allChecked = Array.from(checkboxes).every(c => c.checked);
-            if(allChecked) {
-                showToast('Пауза взята. Ты контролируешь ситуацию!');
-                setTimeout(() => checkboxes.forEach(c => c.checked = false), 1500);
-            }
+        let entries = JSON.parse(localStorage.getItem('molchanie_entries') || '[]');
+        function saveEntry() {
+            const input = document.getElementById('entry-input');
+            if(!input.value.trim()) return;
+            entries.unshift({ id: Date.now(), text: input.value.trim(), date: new Date().toLocaleDateString('ru-RU') });
+            localStorage.setItem('molchanie_entries', JSON.stringify(entries));
+            input.value = '';
+            renderEntries();
         }
 
-        init();
+        function renderEntries() {
+            const list = document.getElementById('entries-list');
+            list.innerHTML = entries.map(e => `<div style="font-size:12px; border-bottom:1px solid var(--border-color); padding:4px 0;">${e.text} (${e.date})</div>`).join('');
+            document.getElementById('streak-num').innerText = new Set(entries.map(e => e.date)).size;
+        }
+
+        function downloadTxt() {
+            const blob = new Blob([entries.map(e => `${e.date}: ${e.text}`).join('\n')], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'dnevnik.txt';
+            a.click();
+        }
+
+        function toggleTheme() { document.body.classList.toggle('light-theme'); }
+        renderEntries();
     </script>
 </body>
 </html>
