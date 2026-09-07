@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Молчание — практика сдержанности</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#15171b">
+<style>
+  :root{
+    --ink:#15171b;
+    --ink-soft:#1d2025;
+    --paper:#ece7df;
+    --paper-dim:#b9b3a6;
+    --muted:#8a8577;
+    --gold:#a9812f;
+    --gold-soft:#c9a45c;
+    --line:rgba(236,231,223,0.14);
+    --serif:'Iowan Old Style','Palatino Linotype',Georgia,serif;
+    --sans:-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  html[data-theme="light"]{
+    --ink:#f6f3ee;
+    --ink-soft:#ebe6dd;
+    --paper:#211d17;
+    --paper-dim:#4a4238;
+    --muted:#8a8072;
+    --gold:#8a6423;
+    --gold-soft:#a9812f;
+    --line:rgba(33,29,23,0.14);
+  }
+  html{transition:background 0.3s;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--ink);color:var(--paper);font-family:var(--sans);}
+  body{min-height:100vh; line-height:1.5;}
+  .wrap{max-width:520px;margin:0 auto;padding:0 24px 80px;}
+
+  header.top{
+    padding:32px 24px 20px;
+    display:flex; align-items:center; gap:12px;
+    max-width:520px; margin:0 auto;
+  }
+  .mark{
+    width:14px;height:14px;border-radius:50%;
+    background:var(--gold);
+    flex-shrink:0;
+  }
+  header.top h1{
+    font-family:var(--serif);
+    font-size:20px;
+    font-weight:400;
+    letter-spacing:0.5px;
+    margin:0;
+    color:var(--paper);
+  }
+
+  section{padding:44px 0; border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  .eyebrow{
+    font-size:13px; color:var(--muted); margin:0 0 14px;
+  }
+  h2{
+    font-family:var(--serif); font-weight:400;
+    font-size:22px; margin:0 0 18px; color:var(--paper);
+  }
+
+  /* HERO */
+  .hero{padding-top:12px; text-align:center;}
+  .breath{
+    width:120px;height:120px;margin:0 auto 32px;
+    border-radius:50%;
+    border:1px solid var(--gold-soft);
+    display:flex;align-items:center;justify-content:center;
+    animation:breathe 6s ease-in-out infinite;
+  }
+  .breath-inner{
+    width:64%;height:64%;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--gold-soft), var(--gold) 70%);
+    opacity:0.85;
+  }
+  @keyframes breathe{
+    0%,100%{ transform:scale(0.85); }
+    50%{ transform:scale(1.05); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .breath{animation:none;}
+  }
+  .quote{
+    font-family:var(--serif);
+    font-size:21px; line-height:1.55;
+    color:var(--paper);
+    min-height:96px;
+    margin:0 auto 20px;
+    max-width:400px;
+  }
+  .quote-tap{
+    font-size:13px; color:var(--muted); border:none; background:none;
+    font-family:var(--sans); padding:10px 0; cursor:pointer;
+  }
+  .quote-tap:active{color:var(--gold-soft);}
+
+  /* RULES */
+  .rule{padding:18px 0; border-top:1px solid var(--line);}
+  .rule:first-child{border-top:none; padding-top:0;}
+  .rule h3{
+    font-family:var(--serif); font-weight:400; font-size:17px;
+    margin:0 0 6px; color:var(--paper);
+  }
+  .rule p{margin:0; font-size:15px; color:var(--paper-dim);}
+
+  /* QUIZ */
+  .q-block{display:none;}
+  .q-block.active{display:block;}
+  .q-text{font-size:16px; margin:0 0 18px; color:var(--paper);}
+  .q-opt{
+    display:block; width:100%; text-align:left;
+    background:none; border:1px solid var(--line); color:var(--paper);
+    font-family:var(--sans); font-size:15px;
+    padding:14px 16px; margin-bottom:10px; cursor:pointer;
+    border-radius:2px;
+  }
+  .q-opt:active{border-color:var(--gold-soft); color:var(--gold-soft);}
+  .q-result{font-family:var(--serif); font-size:18px; line-height:1.6; color:var(--paper);}
+  .q-restart{
+    margin-top:18px; font-size:13px; color:var(--muted);
+    background:none; border:none; cursor:pointer; padding:0;
+    text-decoration:underline;
+  }
+
+  /* TIMER */
+  .timer-wrap{text-align:center;}
+  .timer-face{
+    width:180px;height:180px;margin:0 auto 26px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .timer-num{font-family:var(--serif); font-size:38px; color:var(--paper);}
+  .timer-face.running{border-color:var(--gold-soft); animation:breathe 4s ease-in-out infinite;}
+  .timer-btns{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  .btn{
+    background:none; border:1px solid var(--gold-soft); color:var(--gold-soft);
+    font-family:var(--sans); font-size:14px; padding:11px 18px;
+    cursor:pointer; border-radius:2px;
+  }
+  .btn:active{background:var(--gold-soft); color:var(--ink);}
+  .btn.ghost{border-color:var(--line); color:var(--muted);}
+
+  /* JOURNAL */
+  textarea{
+    width:100%; min-height:100px; background:var(--ink-soft);
+    border:1px solid var(--line); color:var(--paper);
+    font-family:var(--sans); font-size:15px; padding:14px;
+    border-radius:2px; resize:vertical; margin-bottom:12px;
+  }
+  textarea::placeholder{color:var(--muted);}
+  .entry{
+    padding:16px 0; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; gap:12px;
+  }
+  .entry-text{font-size:15px; color:var(--paper-dim); flex:1;}
+  .entry-date{font-size:12px; color:var(--muted); white-space:nowrap; margin-top:2px;}
+  .entry-del{
+    background:none;border:none;color:var(--muted);cursor:pointer;
+    font-size:18px; line-height:1; padding:0 0 0 8px;
+  }
+  .empty{color:var(--muted); font-size:14px; padding-top:8px;}
+
+  footer{
+    text-align:center; padding:36px 24px 24px; color:var(--muted); font-size:12px;
+  }
+
+  /* MONITOR */
+  .mon-note{font-size:13px; color:var(--muted); margin:0 0 22px; line-height:1.6;}
+  .mon-wrap{text-align:center;}
+  .mon-face{
+    width:180px;height:180px;margin:0 auto 20px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    position:relative; transition:border-color .3s;
+  }
+  .mon-face.active{border-color:var(--gold-soft);}
+  .mon-face.talking{border-color:var(--gold);}
+  .mon-time{font-family:var(--serif); font-size:30px; color:var(--paper);}
+  .mon-status{font-size:12px; color:var(--muted); margin-top:6px;}
+  .mon-limits{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:18px;}
+  .mon-limit{
+    background:none; border:1px solid var(--line); color:var(--muted);
+    font-family:var(--sans); font-size:13px; padding:8px 14px;
+    cursor:pointer; border-radius:2px;
+  }
+  .mon-limit.selected{border-color:var(--gold-soft); color:var(--gold-soft);}
+  .mon-toggle{margin-top:4px;}
+  .mon-overlay{
+    position:fixed; inset:0; background:rgba(21,23,27,0.97);
+    display:none; align-items:center; justify-content:center;
+    z-index:999; text-align:center; padding:24px;
+  }
+  .mon-overlay.show{display:flex;}
+  .mon-overlay p{
+    font-family:var(--serif); font-size:28px; color:var(--gold-soft);
+  }
+
+  /* VIDEO */
+  .video-item{margin-bottom:26px;}
+  .video-item:last-child{margin-bottom:0;}
+  .video-title{font-size:14px; color:var(--paper-dim); margin:0 0 10px;}
+  .video-frame{
+    position:relative; width:100%; padding-bottom:56.25%;
+    background:var(--ink-soft); border:1px solid var(--line);
+  }
+  .video-frame iframe{
+    position:absolute; top:0; left:0; width:100%; height:100%; border:0;
+  }
+
+  /* SHARE */
+  .share-btn{
+    background:none; border:1px solid var(--line); color:var(--muted);
+    font-family:var(--sans); font-size:13px; padding:8px 16px;
+    cursor:pointer; border-radius:2px; margin-left:8px;
+  }
+  .share-btn:active{border-color:var(--gold-soft); color:var(--gold-soft);}
+
+  /* STREAK */
+  .streak-box{
+    display:flex; align-items:baseline; gap:10px;
+    margin-bottom:22px; padding-bottom:22px; border-bottom:1px solid var(--line);
+  }
+  .streak-num{font-family:var(--serif); font-size:34px; color:var(--gold-soft);}
+  .streak-label{font-size:13px; color:var(--muted);}
+
+  /* THREE QUESTIONS */
+  .tq-item{
+    display:flex; align-items:center; gap:14px;
+    padding:16px 0; border-top:1px solid var(--line); cursor:pointer;
+  }
+  .tq-item:first-child{border-top:none;}
+  .tq-box{
+    width:22px;height:22px; border:1px solid var(--gold-soft); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--gold-soft);
+  }
+  .tq-item.checked .tq-box{background:var(--gold-soft); color:var(--ink);}
+  .tq-text{font-size:15px; color:var(--paper-dim);}
+  .tq-result{
+    margin-top:18px; font-family:var(--serif); font-size:17px; color:var(--paper);
+    min-height:24px;
+  }
+
+  /* EXPORT */
+  .export-btn{
+    background:none; border:1px solid var(--line); color:var(--muted);
+    font-family:var(--sans); font-size:13px; padding:9px 16px;
+    cursor:pointer; border-radius:2px; margin-top:14px;
+  }
+  .export-btn:active{border-color:var(--gold-soft); color:var(--gold-soft);}
+
+  /* MUSIC TOGGLE */
+  header.top{position:relative;}
+  .music-btn{
+    margin-left:auto;
+    background:none; border:1px solid var(--line); color:var(--muted);
+    font-family:var(--sans); font-size:12px; padding:7px 14px;
+    cursor:pointer; border-radius:2px;
+  }
+  .music-btn.playing{border-color:var(--gold-soft); color:var(--gold-soft);}
+  .theme-btn{
+    background:none; border:1px solid var(--line); color:var(--muted);
+    font-family:var(--sans); font-size:12px; padding:7px 12px;
+    cursor:pointer; border-radius:2px; margin-left:8px;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="mark"></div>
+  <h1>Молчание</h1>
+  <button class="music-btn" id="musicBtn" onclick="toggleMusic()">Играть</button>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">Светлая</button>
+</header>
+
+<div class="wrap">
+
+  <section class="hero">
+    <div class="breath"><div class="breath-inner"></div></div>
+    <p class="quote" id="quoteText"></p>
+    <button class="quote-tap" onclick="newQuote()">Другая мысль →</button>
+    <button class="share-btn" onclick="shareQuote()">Поделиться</button>
+  </section>
+
+  <section>
+    <p class="eyebrow">Основа</p>
+    <h2>Три правила выдержки</h2>
+    <div class="rule">
+      <h3>Пауза важнее реакции</h3>
+      <p>Две-три секунды молчания перед ответом на провокацию — и ты уже управляешь ситуацией, а не она тобой.</p>
+    </div>
+    <div class="rule">
+      <h3>Не объясняй лишнее</h3>
+      <p>Оправдание, которого не просили, всегда снижает вес твоих слов. Сказал — и оставил как есть.</p>
+    </div>
+    <div class="rule">
+      <h3>Слушай дольше, чем говоришь</h3>
+      <p>Человек, который меньше говорит, но точно — запоминается сильнее того, кто говорит много.</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Проверь себя</p>
+    <h2>Стоит ли сейчас молчать?</h2>
+    <div id="quiz">
+      <div class="q-block active" data-q="0">
+        <p class="q-text">Тебя только что публично покритиковали при коллегах.</p>
+        <button class="q-opt" onclick="answer(0)">Сразу отвечаю, чтобы восстановить справедливость</button>
+        <button class="q-opt" onclick="answer(1)">Молчу, отвечу позже — лично и спокойно</button>
+      </div>
+      <div class="q-block" data-q="1">
+        <p class="q-text">В переписке тебе пишут резко и на эмоциях.</p>
+        <button class="q-opt" onclick="answer(0)">Отвечаю сразу в том же тоне</button>
+        <button class="q-opt" onclick="answer(1)">Не отвечаю, пока не остыну</button>
+      </div>
+      <div class="q-block" data-q="2">
+        <p class="q-text">Тебя спрашивают мнение о человеке, которого нет рядом.</p>
+        <button class="q-opt" onclick="answer(0)">Говорю всё, что думаю</button>
+        <button class="q-opt" onclick="answer(1)">Говорю мягко или ухожу от темы</button>
+      </div>
+      <div class="q-block" data-q="result">
+        <p class="q-result" id="qResult"></p>
+        <button class="q-restart" onclick="restartQuiz()">Пройти заново</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Инструмент</p>
+    <h2>Пауза перед ответом</h2>
+    <div class="timer-wrap">
+      <div class="timer-face" id="timerFace"><span class="timer-num" id="timerNum">30</span></div>
+      <div class="timer-btns" id="timerBtns">
+        <button class="btn" onclick="startTimer(30)">30 сек</button>
+        <button class="btn" onclick="startTimer(60)">1 мин</button>
+        <button class="btn" onclick="startTimer(120)">2 мин</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Инструмент</p>
+    <h2>Монитор голоса</h2>
+    <p class="mon-note">Слушает через микрофон, пока страница открыта на экране. Звук нигде не сохраняется и не отправляется — только замеряется громкость на месте. Работает только на переднем плане: выключишь экран или свернёшь браузер — микрофон отключится.</p>
+    <div class="mon-wrap">
+      <div class="mon-face" id="monFace">
+        <span class="mon-time" id="monTime">0:00</span>
+        <span class="mon-status" id="monStatus">выключено</span>
+      </div>
+      <div class="mon-limits" id="monLimits">
+        <button class="mon-limit selected" onclick="setMonLimit(30,this)">30 сек</button>
+        <button class="mon-limit" onclick="setMonLimit(60,this)">1 мин</button>
+        <button class="mon-limit" onclick="setMonLimit(120,this)">2 мин</button>
+      </div>
+      <button class="btn mon-toggle" id="monToggleBtn" onclick="toggleMonitor()">Включить микрофон</button>
+    </div>
+  </section>
+
+  <div class="mon-overlay" id="monOverlay">
+    <p>Помолчи.</p>
+  </div>
+
+  <section>
+    <p class="eyebrow">Смотреть</p>
+    <h2>О молчании</h2>
+    <div class="video-item">
+      <p class="video-title">Сила молчания</p>
+      <div class="video-frame">
+        <iframe src="https://www.youtube.com/embed/KPS-IPe871w" title="Сила молчания" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+    <div class="video-item">
+      <p class="video-title">Молчание в стоической традиции</p>
+      <div class="video-frame">
+        <iframe src="https://www.youtube.com/embed/OZtEzqpMHU4" title="Молчание и стоицизм" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+    <a class="btn" style="display:inline-block;text-decoration:none;margin-top:8px;" href="https://www.youtube.com/results?search_query=сила+молчания+сдержанность" target="_blank" rel="noopener">Больше видео на YouTube →</a>
+  </section>
+
+  <section>
+    <p class="eyebrow">Прежде чем сказать</p>
+    <h2>Три вопроса</h2>
+    <div class="tq-item" onclick="toggleTQ(this,0)">
+      <div class="tq-box">✓</div>
+      <p class="tq-text">Это правда?</p>
+    </div>
+    <div class="tq-item" onclick="toggleTQ(this,1)">
+      <div class="tq-box">✓</div>
+      <p class="tq-text">Это нужно сказать?</p>
+    </div>
+    <div class="tq-item" onclick="toggleTQ(this,2)">
+      <div class="tq-box">✓</div>
+      <p class="tq-text">Это можно сказать по-доброму?</p>
+    </div>
+    <p class="tq-result" id="tqResult"></p>
+  </section>
+
+  <section>
+    <p class="eyebrow">Личное</p>
+    <h2>Дневник выдержки</h2>
+    <div class="streak-box">
+      <span class="streak-num" id="streakNum">0</span>
+      <span class="streak-label">дней подряд с записью</span>
+    </div>
+    <textarea id="journalInput" placeholder="Опиши момент, когда промолчал вместо того, чтобы сорваться. Что ты выиграл?"></textarea>
+    <button class="btn" onclick="saveEntry()">Сохранить запись</button>
+    <div id="journalList"></div>
+    <button class="export-btn" onclick="exportJournal()">Скачать записи (.txt)</button>
+  </section>
+
+</div>
+
+<footer>lebapdev</footer>
+
+<script>
+/* ---- quotes ---- */
+const quotes = [
+  "Молчание — не отсутствие ответа, а выбор момента для него.",
+  "Слово, которое ты не сказал, никогда не работает против тебя.",
+  "Тот, кто молчит первым в споре, обычно выигрывает его.",
+  "Тишина после вопроса иногда говорит больше, чем любой ответ.",
+  "Не каждый выпад заслуживает твоего голоса.",
+  "Сдержанность — это не слабость, а запас сил на потом.",
+  "Люди запоминают не то, сколько ты сказал, а то, как ты сказал мало и по делу.",
+  "Пауза перед ответом — это уже ответ.",
+  "Объяснять то, что не спросили — значит оправдываться заранее.",
+  "Крепче всего звучит голос, который редко повышают.",
+  "Иногда лучший аргумент — это отсутствие спора.",
+  "Молчание в нужный момент стоит дороже любой речи."
+];
+let lastQuote = -1;
+function newQuote(){
+  let i;
+  do { i = Math.floor(Math.random()*quotes.length); } while(i===lastQuote && quotes.length>1);
+  lastQuote = i;
+  document.getElementById('quoteText').textContent = quotes[i];
+}
+newQuote();
+
+function toggleTheme(){
+  const html = document.documentElement;
+  const btn = document.getElementById('themeBtn');
+  const isLight = html.getAttribute('data-theme') === 'light';
+  if(isLight){
+    html.removeAttribute('data-theme');
+    btn.textContent = 'Светлая';
+    localStorage.setItem('molchanie_theme', 'dark');
+  } else {
+    html.setAttribute('data-theme', 'light');
+    btn.textContent = 'Тёмная';
+    localStorage.setItem('molchanie_theme', 'light');
+  }
+}
+(function applySavedTheme(){
+  const saved = localStorage.getItem('molchanie_theme');
+  if(saved === 'light'){
+    document.documentElement.setAttribute('data-theme', 'light');
+    window.addEventListener('DOMContentLoaded', ()=>{
+      const btn = document.getElementById('themeBtn');
+      if(btn) btn.textContent = 'Тёмная';
+    });
+  }
+})();
+
+function shareQuote(){
+  const text = document.getElementById('quoteText').textContent;
+  if(navigator.share){
+    navigator.share({text: text}).catch(()=>{});
+  } else {
+    const url = 'https://wa.me/?text=' + encodeURIComponent(text);
+    window.open(url, '_blank');
+  }
+}
+
+/* ---- ambient background sound (сгенерировано в реальном времени, не аудиофайл) ---- */
+let musicCtx = null;
+let musicNodes = [];
+let musicPlaying = false;
+
+function toggleMusic(){
+  const btn = document.getElementById('musicBtn');
+  if(musicPlaying){
+    stopMusic();
+    btn.textContent = 'Играть';
+    btn.classList.remove('playing');
+  } else {
+    startMusic();
+    btn.textContent = 'Пауза';
+    btn.classList.add('playing');
+  }
+}
+
+function startMusic(){
+  musicCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const masterGain = musicCtx.createGain();
+  masterGain.gain.value = 0;
+  masterGain.connect(musicCtx.destination);
+  masterGain.gain.linearRampToValueAtTime(0.11, musicCtx.currentTime + 2);
+
+  // несколько спокойных аккордов, между которыми музыка медленно переходит
+  const chords = [
+    [130.81, 164.81, 196.00, 246.94], // C3 E3 G3 B3
+    [146.83, 174.61, 220.00, 261.63], // D3 F3 A3 C4
+    [130.81, 155.56, 196.00, 233.08], // C3 Eb3 G3 Bb3
+    [123.47, 164.81, 196.00, 246.94]  // B2 E3 G3 B3
+  ];
+  let chordIndex = 0;
+
+  const voices = chords[0].map((f, i) => {
+    const osc = musicCtx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = f;
+
+    const lfo = musicCtx.createOscillator();
+    lfo.frequency.value = 0.08 + i*0.03;
+    const lfoGain = musicCtx.createGain();
+    lfoGain.gain.value = 0.18;
+
+    const voiceGain = musicCtx.createGain();
+    voiceGain.gain.value = 0.5;
+
+    lfo.connect(lfoGain);
+    lfoGain.connect(voiceGain.gain);
+    osc.connect(voiceGain);
+    voiceGain.connect(masterGain);
+
+    osc.start();
+    lfo.start();
+    musicNodes.push(osc, lfo);
+    return osc;
+  });
+
+  // медленная смена аккордов каждые 14 секунд
+  const chordInterval = setInterval(()=>{
+    chordIndex = (chordIndex + 1) % chords.length;
+    voices.forEach((osc, i) => {
+      osc.frequency.linearRampToValueAtTime(chords[chordIndex][i], musicCtx.currentTime + 4);
+    });
+  }, 14000);
+  musicNodes.push({stop: ()=>clearInterval(chordInterval)});
+
+  // редкие мягкие "капли" звука сверху — как колокольчик издалека
+  function pluck(){
+    if(!musicCtx) return;
+    const now = musicCtx.currentTime;
+    const notes = [523.25, 587.33, 659.25, 783.99, 880.00]; // C5 D5 E5 G5 A5
+    const freq = notes[Math.floor(Math.random()*notes.length)];
+    const osc = musicCtx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const gain = musicCtx.createGain();
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.06, now + 0.3);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 4);
+    osc.connect(gain);
+    gain.connect(masterGain);
+    osc.start(now);
+    osc.stop(now + 4.2);
+  }
+  const pluckInterval = setInterval(()=>{ pluck(); }, 6000 + Math.random()*4000);
+  musicNodes.push({stop: ()=>clearInterval(pluckInterval)});
+
+  musicNodes.push(masterGain);
+  musicPlaying = true;
+}
+
+function stopMusic(){
+  if(!musicCtx) return;
+  const masterGain = musicNodes[musicNodes.length-1];
+  masterGain.gain.linearRampToValueAtTime(0, musicCtx.currentTime + 1);
+  setTimeout(()=>{
+    musicNodes.forEach(n => { if(n.stop) n.stop(); });
+    if(musicCtx) musicCtx.close();
+    musicCtx = null;
+    musicNodes = [];
+  }, 1100);
+  musicPlaying = false;
+}
+
+/* ---- quiz ---- */
+let score = 0;
+let step = 0;
+function answer(val){
+  score += val;
+  step++;
+  document.querySelectorAll('.q-block').forEach(b=>b.classList.remove('active'));
+  if(step < 3){
+    document.querySelector('.q-block[data-q="'+step+'"]').classList.add('active');
+  } else {
+    let result;
+    if(score === 3) result = "Ты уже умеешь держать паузу. Продолжай в том же духе — это редкое качество.";
+    else if(score === 2) result = "В целом ты сдержан, но есть моменты, где эмоции берут верх. Обрати внимание на них.";
+    else result = "Тебе стоит чаще брать паузу перед ответом. Начни с малого — 3 секунды тишины перед реакцией.";
+    document.getElementById('qResult').textContent = result;
+    document.querySelector('.q-block[data-q="result"]').classList.add('active');
+  }
+}
+function restartQuiz(){
+  score = 0; step = 0;
+  document.querySelectorAll('.q-block').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.q-block[data-q="0"]').classList.add('active');
+}
+
+/* ---- timer ---- */
+let timerInterval = null;
+function startTimer(seconds){
+  clearInterval(timerInterval);
+  let remaining = seconds;
+  const face = document.getElementById('timerFace');
+  const num = document.getElementById('timerNum');
+  face.classList.add('running');
+  num.textContent = remaining;
+  timerInterval = setInterval(()=>{
+    remaining--;
+    if(remaining <= 0){
+      clearInterval(timerInterval);
+      face.classList.remove('running');
+      num.textContent = "Готово";
+      setTimeout(()=>{ num.textContent = seconds; }, 1800);
+    } else {
+      num.textContent = remaining;
+    }
+  }, 1000);
+}
+
+/* ---- voice monitor ---- */
+let monLimit = 30;         // seconds of continuous talking before reminder
+const SILENCE_RESET = 4;   // seconds of quiet that count as "stopped talking"
+const THRESHOLD = 0.018;   // rms volume threshold for "talking"
+let monActive = false;
+let audioCtx, analyser, micStream, monRAF;
+let speakStart = null;
+let lastLoud = null;
+let monTickInterval = null;
+
+function setMonLimit(sec, btn){
+  monLimit = sec;
+  document.querySelectorAll('.mon-limit').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+async function toggleMonitor(){
+  if(monActive){
+    stopMonitor();
+  } else {
+    try{
+      micStream = await navigator.mediaDevices.getUserMedia({audio:true});
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(micStream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 1024;
+      source.connect(analyser);
+      monActive = true;
+      speakStart = null;
+      lastLoud = null;
+      document.getElementById('monFace').classList.add('active');
+      document.getElementById('monToggleBtn').textContent = 'Выключить микрофон';
+      document.getElementById('monStatus').textContent = 'слушаю...';
+      monRAF = requestAnimationFrame(monitorLoop);
+      monTickInterval = setInterval(updateMonDisplay, 250);
+    } catch(e){
+      document.getElementById('monStatus').textContent = 'нет доступа к микрофону';
+    }
+  }
+}
+
+function stopMonitor(){
+  monActive = false;
+  if(micStream) micStream.getTracks().forEach(t=>t.stop());
+  if(audioCtx) audioCtx.close();
+  cancelAnimationFrame(monRAF);
+  clearInterval(monTickInterval);
+  document.getElementById('monFace').classList.remove('active','talking');
+  document.getElementById('monToggleBtn').textContent = 'Включить микрофон';
+  document.getElementById('monStatus').textContent = 'выключено';
+  document.getElementById('monTime').textContent = '0:00';
+  speakStart = null; lastLoud = null;
+}
+
+function monitorLoop(){
+  if(!monActive) return;
+  const data = new Uint8Array(analyser.fftSize);
+  analyser.getByteTimeDomainData(data);
+  let sum = 0;
+  for(let i=0;i<data.length;i++){
+    const v = (data[i]-128)/128;
+    sum += v*v;
+  }
+  const rms = Math.sqrt(sum/data.length);
+  const now = Date.now()/1000;
+
+  if(rms > THRESHOLD){
+    lastLoud = now;
+    if(speakStart === null) speakStart = now;
+  } else if(speakStart !== null && lastLoud !== null && (now - lastLoud) > SILENCE_RESET){
+    speakStart = null;
+  }
+  monRAF = requestAnimationFrame(monitorLoop);
+}
+
+function updateMonDisplay(){
+  if(!monActive) return;
+  const face = document.getElementById('monFace');
+  const status = document.getElementById('monStatus');
+  const timeEl = document.getElementById('monTime');
+  if(speakStart === null){
+    face.classList.remove('talking');
+    status.textContent = 'слушаю...';
+    timeEl.textContent = '0:00';
+    return;
+  }
+  const elapsed = Date.now()/1000 - speakStart;
+  face.classList.add('talking');
+  status.textContent = 'говоришь без пауз';
+  const m = Math.floor(elapsed/60);
+  const s = Math.floor(elapsed%60);
+  timeEl.textContent = m + ':' + String(s).padStart(2,'0');
+
+  if(elapsed >= monLimit){
+    triggerReminder();
+    speakStart = Date.now()/1000;
+  }
+}
+
+function triggerReminder(){
+  if(navigator.vibrate) navigator.vibrate([200,100,200,100,400]);
+  const overlay = document.getElementById('monOverlay');
+  overlay.classList.add('show');
+  setTimeout(()=>overlay.classList.remove('show'), 2200);
+}
+
+/* ---- journal (localStorage) ---- */
+const STORAGE_KEY = 'molchanie_journal';
+function loadEntries(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch(e){ return []; }
+}
+function saveEntries(list){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+function renderJournal(){
+  const list = loadEntries();
+  const el = document.getElementById('journalList');
+  if(list.length === 0){
+    el.innerHTML = '<p class="empty">Записей пока нет.</p>';
+    return;
+  }
+  el.innerHTML = list.map((e,i)=>`
+    <div class="entry">
+      <div>
+        <div class="entry-text">${escapeHtml(e.text)}</div>
+        <div class="entry-date">${e.date}</div>
+      </div>
+      <button class="entry-del" onclick="deleteEntry(${i})">×</button>
+    </div>
+  `).join('');
+}
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+function saveEntry(){
+  const input = document.getElementById('journalInput');
+  const text = input.value.trim();
+  if(!text) return;
+  const list = loadEntries();
+  const now = new Date();
+  const date = now.toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
+  const iso = now.toISOString().slice(0,10);
+  list.unshift({text, date, iso});
+  saveEntries(list);
+  input.value = '';
+  renderJournal();
+  updateStreak();
+}
+function deleteEntry(i){
+  const list = loadEntries();
+  list.splice(i,1);
+  saveEntries(list);
+  renderJournal();
+  updateStreak();
+}
+renderJournal();
+updateStreak();
+
+function updateStreak(){
+  const list = loadEntries();
+  const days = new Set(list.map(e => e.iso).filter(Boolean));
+  const el = document.getElementById('streakNum');
+  if(!el) return;
+  const oneDay = 86400000;
+  let cursor = new Date();
+  cursor.setHours(0,0,0,0);
+  let todayStr = cursor.toISOString().slice(0,10);
+  let streak = 0;
+  if(!days.has(todayStr)){
+    cursor = new Date(cursor.getTime() - oneDay);
+  }
+  while(days.has(cursor.toISOString().slice(0,10))){
+    streak++;
+    cursor = new Date(cursor.getTime() - oneDay);
+  }
+  el.textContent = streak;
+}
+
+function exportJournal(){
+  const list = loadEntries();
+  if(list.length === 0) return;
+  const content = list.map(e => `${e.date}\n${e.text}\n`).join('\n---\n\n');
+  const blob = new Blob([content], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'dnevnik-vyderzhki.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ---- three questions ---- */
+const tqState = [false,false,false];
+function toggleTQ(el, idx){
+  tqState[idx] = !tqState[idx];
+  el.classList.toggle('checked', tqState[idx]);
+  const result = document.getElementById('tqResult');
+  const checked = tqState.filter(Boolean).length;
+  if(checked === 3) result.textContent = 'Все три — да. Можно говорить.';
+  else if(checked === 0) result.textContent = '';
+  else result.textContent = 'Пока не все условия выполнены — возможно, лучше промолчать.';
+}
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+
+</body>
+</html>
