@@ -104,15 +104,16 @@
 
         .checkbox-group { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
         .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-
-        .audio-box {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(0,0,0,0.15);
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
+        
+        .streak-badge {
+            background: rgba(169, 129, 47, 0.15);
+            border: 1px solid var(--gold);
+            color: var(--gold-soft);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -123,14 +124,13 @@
         <button class="top-btn" onclick="toggleTheme()">Тема</button>
     </header>
 
-    <!-- АТМОСФЕРА -->
+    <!-- СЕРИЯ ДНЕЙ И ЧЕЛЛЕНДЖ -->
     <div class="card">
-        <div class="section-label">Атмосфера</div>
-        <h2>Фоновый покой</h2>
-        <div class="audio-box">
-            <span style="font-size: 13px; color: var(--paper-dim);">Расслабляющий гул</span>
-            <button class="top-btn" id="audio-btn" onclick="toggleAudio()">▶ Включить</button>
-        </div>
+        <div class="section-label">Привычка и Лайфхак</div>
+        <div class="streak-badge" id="streak-count">🔥 Серия выдержки: 1 дн.</div>
+        <h2>Задание дня</h2>
+        <div id="challenge-text" style="font-size: 14px; margin-bottom: 10px; color: var(--paper-dim);"></div>
+        <button class="btn" id="challenge-btn" onclick="completeChallenge()">Выполнено сегодня ✓</button>
     </div>
 
     <!-- ТАЙМЕР / БУДИЛЬНИК МОЛЧАНИЯ -->
@@ -139,7 +139,7 @@
         <h2>Будильник молчания</h2>
         <div style="display: flex; gap: 8px; align-items: center;">
             <input type="number" id="alarm-min" placeholder="Минуты (напр. 15)" min="1" max="180">
-            <button class="btn" style="margin-top:0; width: auto; whitespace: nowrap;" onclick="setAlarm()">Старт</button>
+            <button class="btn" style="margin-top:0; width: auto; white-space: nowrap;" onclick="setAlarm()">Старт</button>
         </div>
         <div id="alarm-status" style="font-size: 12px; color: var(--gold-soft); margin-top: 5px;"></div>
     </div>
@@ -183,6 +183,7 @@
         
         <textarea id="entry-input" placeholder="Опиши момент, когда вовремя промолчал..."></textarea>
         <button class="btn" onclick="saveEntry()">Сохранить запись</button>
+        <button class="btn btn-sub" style="margin-top: 5px;" onclick="exportEntries()">💾 Скачать дневник (.txt)</button>
         <div id="entries-list" style="margin-top: 10px; font-size: 12px;"></div>
     </div>
 
@@ -190,11 +191,11 @@
     <div class="card">
         <div class="section-label">Ресурсы</div>
         <h2>Материалы</h2>
-        <a class="btn btn-sub" href="https://youtu.be/5qap5aO4i9A" target="_blank">Открыть ролик на YouTube ↗</a>
+        <a class="btn btn-sub" href="https://www.youtube.com/watch?v=5qap5aO4i9A" target="_blank">Открыть ролик на YouTube ↗</a>
         <button class="btn btn-sub" onclick="copyVideoLink()">📋 Скопировать ссылку на видео</button>
         <div style="display: flex; gap: 8px; margin-top: 8px;">
             <a class="btn btn-sub" href="https://github.com/TeamNewPipe/NewPipe/releases/download/v0.29.1/NewPipe_v0.29.1.apk" target="_blank">NewPipe (.apk)</a>
-            <a class="btn btn-sub" href="https://github.com/JunkFood4602/Seal/releases/latest" target="_blank">Seal (Загрузчик)</a>
+            <a class="btn btn-sub" href="https://github.com/deniscerri/ytdl-nis/releases" target="_blank">Загрузчик YTDL</a>
         </div>
     </div>
 
@@ -209,29 +210,55 @@
             navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
         }
 
-        // АУДИО
-        let audioCtx, osc, gainNode, isPlaying = false;
-        function toggleAudio() {
-            if(!isPlaying) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                osc = audioCtx.createOscillator();
-                gainNode = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(108, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                osc.start();
-                document.getElementById('audio-btn').innerText = '⏸ Пауза';
-                isPlaying = true;
-            } else {
-                osc.stop();
-                document.getElementById('audio-btn').innerText = '▶ Включить';
-                isPlaying = false;
+        // ЛАЙФХАКИИ И ТРЕКЕР СЕРИИ
+        const challenges = [
+            "Лайфхак: Сделай паузу в 3 секунды перед тем, как ответить на любой вопрос.",
+            "Лайфхак: Сегодня не доказывай никому свою правоту в социальных сетях и чатах.",
+            "Лайфхак: Если чувствуешь раздражение, сделай паузу и промолчи 1 минуту.",
+            "Лайфхак: Слушай собеседника не перебивая, пока он полностью не закончит мысль.",
+            "Лайфхак: Воздержись от обсуждения или критики кого-либо за спиной."
+        ];
+
+        function initStreakAndChallenge() {
+            const today = new Date().toDateString();
+            const lastVisit = localStorage.getItem('last_visit_date');
+            let streak = parseInt(localStorage.getItem('user_streak') || '1');
+
+            if (lastVisit) {
+                const prevDate = new Date(lastVisit);
+                const diffTime = Math.abs(new Date(today) - prevDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays === 1) {
+                    streak++;
+                    localStorage.setItem('user_streak', streak);
+                } else if (diffDays > 1) {
+                    streak = 1;
+                    localStorage.setItem('user_streak', streak);
+                }
+            }
+            localStorage.setItem('last_visit_date', today);
+            document.getElementById('streak-count').innerText = `🔥 Серия выдержки: ${streak} дн.`;
+
+            // Выбор задания дня
+            const dayIndex = new Date().getDate() % challenges.length;
+            document.getElementById('challenge-text').innerText = challenges[dayIndex];
+
+            if (localStorage.getItem('challenge_' + today) === 'done') {
+                document.getElementById('challenge-btn').innerText = "Выполнено ✓";
+                document.getElementById('challenge-btn').style.opacity = "0.6";
             }
         }
 
-        // БУДИЛЬНИК / ТАЙМЕР
+        function completeChallenge() {
+            const today = new Date().toDateString();
+            localStorage.setItem('challenge_' + today, 'done');
+            document.getElementById('challenge-btn').innerText = "Выполнено ✓";
+            document.getElementById('challenge-btn').style.opacity = "0.6";
+            alert("Задание выполнено! Отличный шаг к самоконтролю.");
+        }
+
+        // БУДИЛЬНИК / ТАЙМЕР С ГОНГОМ
         let alarmTimer = null;
         function setAlarm() {
             const minInput = document.getElementById('alarm-min').value;
@@ -246,29 +273,37 @@
             status.innerText = `Будильник установлен на ${minInput} мин.`;
             
             alarmTimer = setTimeout(() => {
-                playAlarmSound();
+                playGongSound();
                 alert(`Время практики (${minInput} мин.) завершено!`);
                 status.innerText = "";
             }, ms);
         }
 
-        function playAlarmSound() {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        // Звук глубокого гонга (тибетской чаши)
+        function playGongSound() {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(440, ctx.currentTime);
-            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(150, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 3);
+
+            gain.gain.setValueAtTime(0.5, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3);
+
             osc.connect(gain);
             gain.connect(ctx.destination);
             osc.start();
-            osc.stop(ctx.currentTime + 1.5);
+            osc.stop(ctx.currentTime + 3);
         }
 
-        // КОПИРОВАНИЕ ССЫЛКИ (ЛАЙФХАК)
+        // КОПИРОВАНИЕ ССЫЛКИ
         function copyVideoLink() {
-            navigator.clipboard.writeText("https://youtu.be/5qap5aO4i9A").then(() => {
-                alert("Ссылка скопирована! Вставьте её в VidMate, NewPipe или Seal.");
+            navigator.clipboard.writeText("https://www.youtube.com/watch?v=5qap5aO4i9A").then(() => {
+                alert("Ссылка скопирована! Вставьте её в NewPipe или YTDL.");
             });
         }
 
@@ -304,7 +339,7 @@
             document.getElementById('word-count').innerText = savedWords;
         }
 
-        // ДНЕВНИК
+        // ДНЕВНИК И ЭКСПОРТ
         let entries = JSON.parse(localStorage.getItem('molchanie_entries') || '[]');
         function saveEntry() {
             const input = document.getElementById('entry-input');
@@ -316,6 +351,21 @@
         }
         function renderEntries() {
             document.getElementById('entries-list').innerHTML = entries.map(e => `<div style="border-bottom:1px solid var(--border-color); padding:4px 0;">${e.text} <span style="color:var(--muted)">(${e.date})</span></div>`).join('');
+        }
+        function exportEntries() {
+            if(entries.length === 0) {
+                alert('Дневник пока пуст.');
+                return;
+            }
+            let content = "ДНЕВНИК ВЫДЕРЖКИИ И МОЛЧАНИЯ\n\n";
+            entries.forEach((e, i) => {
+                content += `${i + 1}. [${e.date}] ${e.text}\n`;
+            });
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'Мой_Дневник_Молчания.txt';
+            a.click();
         }
 
         // МИКРОФОН
@@ -342,6 +392,9 @@
         }
 
         function toggleTheme() { document.body.classList.toggle('light-theme'); }
+        
+        // ИНИЦИАЛИЗАЦИЯ
+        initStreakAndChallenge();
         renderEntries();
     </script>
 </body>
